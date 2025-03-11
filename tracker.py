@@ -54,13 +54,27 @@ class PersonTracker:
                 boxes = results[0].boxes.xyxy.cpu().numpy().astype(int)
                 track_ids = results[0].boxes.id.cpu().numpy().astype(int)
 
-                # 更新轨迹
+                # 更新轨迹并绘制边界框
                 for box, track_id in zip(boxes, track_ids):
                     x1, y1, x2, y2 = box
                     # 使用底部中心点作为轨迹点
                     center_x = (x1 + x2) // 2
                     bottom_y = y2
                     self.tracks[track_id].append((center_x, bottom_y))
+
+                    # 绘制边界框
+                    color = self.generate_color(track_id)
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+                    # 在边界框上方显示ID
+                    cv2.putText(
+                        frame,
+                        f"ID: {track_id}",
+                        (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        color,
+                        2,
+                    )
 
             # 在当前帧上绘制所有轨迹
             for track_id, points in self.tracks.items():
@@ -99,6 +113,6 @@ class PersonTracker:
 if __name__ == "__main__":
     tracker = PersonTracker(
         yolo_model="yolo12x.pt",  # 使用小型模型，您可以根据需要替换为其他版本
-        video_path="002.mp4",  # 替换为您的视频路径
+        video_path="003.mp4",  # 替换为您的视频路径
     )
-    tracker.process_video("output.mp4")
+    tracker.process_video("output-003.mp4")
